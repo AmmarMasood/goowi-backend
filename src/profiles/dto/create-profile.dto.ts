@@ -21,18 +21,23 @@ export class CharitySupportDto {
 
 export class CreateProfileDto {
   @IsString()
+  @IsOptional()
   name: string;
 
   @IsString()
+  @IsOptional()
   industry: string;
 
   @IsString()
+  @IsOptional()
   phone: string;
 
   @IsString()
+  @IsOptional()
   overview: string;
 
   @IsString()
+  @IsOptional()
   address: string;
 
   @IsString()
@@ -54,21 +59,16 @@ export class CreateProfileDto {
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
+  causesSupported?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
   values?: string[];
 
   @IsObject()
   @IsOptional()
   impactMetrics?: Record<string, any>;
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  supportTypes?: string[];
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  causesSupported?: string[];
 
   @IsArray()
   @Type(() => CharitySupportDto)

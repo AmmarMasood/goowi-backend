@@ -3,7 +3,6 @@ import {
   IsBoolean,
   IsEnum,
   IsMongoId,
-  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -33,9 +32,6 @@ export class ParticipantDto {
 }
 
 export class CreateWaveDto {
-  @IsMongoId()
-  creatorId: string;
-
   @IsString()
   title: string;
 
@@ -50,10 +46,6 @@ export class CreateWaveDto {
   @IsOptional()
   @IsBoolean()
   isNewWave?: boolean;
-
-  @IsOptional()
-  @IsMongoId()
-  parentWaveId?: string;
 
   @IsOptional()
   @IsString()
@@ -75,18 +67,6 @@ export class CreateWaveDto {
   @IsOptional()
   @IsString()
   eventLink?: string;
-
-  @IsOptional()
-  @IsNumber()
-  monetaryValue?: number;
-
-  @IsOptional()
-  @IsString()
-  currency?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isMonetaryValueVisible?: boolean;
 
   @IsOptional()
   @IsArray()

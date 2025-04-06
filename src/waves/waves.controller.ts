@@ -21,10 +21,8 @@ export class WavesController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  create(@Body() createWaveDto: CreateWaveDto) {
-    // Assuming the JWT strategy adds the user to the request
-    // You can use this to validate that the creatorId matches the current user or they have permission
-    return this.wavesService.create(createWaveDto);
+  create(@Body() createWaveDto: CreateWaveDto, @Request() req) {
+    return this.wavesService.create(req.user.userId, createWaveDto);
   }
 
   @Get()
@@ -40,6 +38,12 @@ export class WavesController {
   @Get('charity/:charityId')
   findByCharity(@Param('charityId') charityId: string) {
     return this.wavesService.findByCharity(charityId);
+  }
+
+  @Get('/participant/part/users')
+  @UseGuards(JwtAuthGuard)
+  findByProfile(@Request() req) {
+    return this.wavesService.findByParticipant(req.user.userId);
   }
 
   @Get('cause/:causeName')
@@ -85,34 +89,11 @@ export class WavesController {
     });
   }
 
-  @Post(':id/participants')
+  @Post('/part/:id/participants')
   @UseGuards(JwtAuthGuard)
-  addParticipant(
-    @Param('id') id: string,
-    @Body() participantData: { status?: string },
-    @Request() req,
-  ) {
+  addParticipant(@Param('id') id: string, @Request() req) {
     // Get the profile ID from the authenticated user
-    const profileId = req.user.profileId;
-    return this.wavesService.addParticipant(id, {
-      profileId,
-      status: participantData.status,
-    });
-  }
-
-  @Patch(':id/participants/:profileId')
-  @UseGuards(JwtAuthGuard)
-  updateParticipantStatus(
-    @Param('id') id: string,
-    @Param('profileId') profileId: string,
-    @Body() statusData: { status: string },
-  ) {
-    // You might want to check if the user has permission to update participant status
-    return this.wavesService.updateParticipantStatus(
-      id,
-      profileId,
-      statusData.status,
-    );
+    return this.wavesService.addParticipant(id, req.user.userId);
   }
 
   @Patch(':id/charity-approval')
@@ -130,5 +111,34 @@ export class WavesController {
   remove(@Param('id') id: string) {
     // You might want to check if the user has permission to delete this wave
     return this.wavesService.remove(id);
+  }
+
+  @Get('/all/hashtags')
+  async getAllHashtags(): Promise<string[]> {
+    return this.wavesService.getAllHashTags();
+  }
+
+  @Get('/all/filter')
+  async findWavesWithFilters(
+    @Query('hashtags') hashtags: string[],
+    @Query('title') title: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    // Convert hashtags to an array if it's a single string
+    const hashtagsArray = Array.isArray(hashtags)
+      ? hashtags
+      : hashtags
+        ? [hashtags]
+        : [];
+
+    return this.wavesService.findWavesWithFilters(
+      {
+        hashtags: hashtagsArray,
+        title,
+      },
+      Number(page),
+      Number(limit),
+    );
   }
 }

@@ -9,11 +9,13 @@ import { Profile } from './schemas/profile.schema';
 import { CharitySupportDto, CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { slugify } from 'utils/slugify';
+import { Wave } from 'src/waves/schema/waves.schema';
 
 @Injectable()
 export class ProfilesService {
   constructor(
     @InjectModel(Profile.name) private profileModel: Model<Profile>,
+    @InjectModel(Wave.name) private waveModel: Model<Wave>,
   ) {}
 
   /**
@@ -21,8 +23,10 @@ export class ProfilesService {
    */
   async create(
     userId: string,
+    email: string,
     createProfileDto: CreateProfileDto,
   ): Promise<Profile> {
+    console.log('createProfileDto', userId);
     // Check if profile already exists for this user
     const existingProfile = await this.profileModel.findOne({ userId }).exec();
     if (existingProfile) {
@@ -30,7 +34,7 @@ export class ProfilesService {
     }
 
     // Generate slug from name if not provided
-    const slug = createProfileDto.slug || slugify(createProfileDto.name);
+    const slug = createProfileDto.slug || slugify(email);
 
     // Check if slug is already taken
     const slugExists = await this.profileModel.findOne({ slug }).exec();
@@ -256,6 +260,101 @@ export class ProfilesService {
       total,
       page,
       limit,
+    };
+  }
+
+  async getAllCharities(): Promise<any> {
+    const charities = await this.profileModel.aggregate([
+      {
+        $lookup: {
+          from: 'users', // Ensure this matches the actual collection name
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      {
+        $unwind: {
+          path: '$user',
+          preserveNullAndEmptyArrays: false, // Remove profiles without matching users
+        },
+      },
+      {
+        $match: {
+          'user.role': 'charity', // Filter where user.role is "charity"
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          industry: 1,
+          location: 1,
+          userId: 1,
+          'user.email': 1,
+          'user.role': 1,
+        },
+      },
+    ]);
+
+    console.log('Charities:', charities); // Debugging log
+    return charities;
+  }
+
+  async getUserMetrics(profileId: string): Promise<any> {
+    // 1. Total number of waves created by the user
+    const totalWavesCreated = await this.waveModel.countDocuments({
+      creatorId: profileId,
+    });
+
+    // 2. Total number of waves participated by the user
+    const totalWavesParticipated = await this.waveModel.countDocuments({
+      participants: profileId,
+    });
+
+    // 3. Total number of unique charities supported by the user
+    const profile = await this.profileModel.findById(profileId).exec();
+    if (!profile) {
+      throw new NotFoundException(`Profile with ID ${profileId} not found`);
+    }
+    const uniqueCharitiesSupported = profile.charitiesSupported.filter(
+      (charity) => charity.status === 'approved',
+    ).length;
+
+    // 4. Total number of unique users that participated in the waves created by the user
+    const uniqueParticipants = await this.waveModel.aggregate([
+      {
+        $match: { creatorId: new Types.ObjectId(profileId) }, // Match waves created by the user
+      },
+      {
+        $unwind: '$participants', // Unwind the participants array
+      },
+      {
+        $group: {
+          _id: null,
+          uniqueParticipants: { $addToSet: '$participants' }, // Collect unique participants
+        },
+      },
+      {
+        $project: {
+          count: { $size: '$uniqueParticipants' }, // Count the unique participants
+        },
+      },
+    ]);
+    const totalUniqueParticipants =
+      uniqueParticipants.length > 0 ? uniqueParticipants[0].count : 0;
+
+    // 5. List of all waves.causeNames supported by the user
+    const causeNames = await this.waveModel.distinct('causeName', {
+      participants: profileId,
+    });
+
+    // Return the metrics
+    return {
+      totalWavesCreated,
+      totalWavesParticipated,
+      uniqueCharitiesSupported,
+      totalUniqueParticipants,
+      causeNames,
     };
   }
 }

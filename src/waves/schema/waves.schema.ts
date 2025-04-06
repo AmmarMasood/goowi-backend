@@ -28,9 +28,6 @@ export class Wave extends Document {
   @Prop({ default: false })
   isNewWave: boolean;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Wave' })
-  parentWaveId: Wave;
-
   @Prop()
   causeName: string;
 
@@ -45,15 +42,6 @@ export class Wave extends Document {
 
   @Prop()
   eventLink: string;
-
-  @Prop()
-  monetaryValue: number;
-
-  @Prop()
-  currency: string;
-
-  @Prop({ default: false })
-  isMonetaryValueVisible: boolean;
 
   @Prop({ type: [String] })
   imageUrls: string[];
@@ -91,21 +79,9 @@ export class Wave extends Document {
   }>;
 
   @Prop({
-    type: [
-      {
-        profileId: { type: MongooseSchema.Types.ObjectId, ref: 'Profile' },
-        status: {
-          type: String,
-          enum: ['pending', 'approved', 'rejected'],
-          default: 'pending',
-        },
-      },
-    ],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Profile' }], // Updated to be an array of profileIds
   })
-  participants: Array<{
-    profileId: Profile;
-    status: string;
-  }>;
+  participants: Profile[]; // Array of profileIds
 
   @Prop({ default: 'pending', enum: ['pending', 'approved', 'rejected'] })
   charityApprovalStatus: string;

@@ -7,7 +7,7 @@ export class Profile extends Document {
   @Prop({ required: true, type: MongooseSchema.Types.ObjectId, ref: 'User' })
   userId: User;
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   name: string;
 
   @Prop()
@@ -35,16 +35,13 @@ export class Profile extends Document {
   socialMediaLinks: string[];
 
   @Prop({ type: [String] })
+  causesSupported: string[];
+
+  @Prop({ type: [String] })
   values: string[];
 
   @Prop({ type: Object })
   impactMetrics: Record<string, any>;
-
-  @Prop({ type: [String] })
-  supportTypes: string[];
-
-  @Prop({ type: [String] })
-  causesSupported: string[];
 
   @Prop({
     type: [

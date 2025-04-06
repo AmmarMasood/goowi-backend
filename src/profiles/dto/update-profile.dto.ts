@@ -58,16 +58,6 @@ export class UpdateProfileDto {
   impactMetrics?: Record<string, any>;
 
   @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  supportTypes?: string[];
-
-  @IsArray()
-  @IsString({ each: true })
-  @IsOptional()
-  causesSupported?: string[];
-
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CharitySupportDto)
   @IsOptional()
@@ -76,6 +66,11 @@ export class UpdateProfileDto {
   @IsString()
   @IsOptional()
   bannerImage?: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  causesSupported?: string[];
 
   @IsString()
   @IsOptional()

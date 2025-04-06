@@ -3,7 +3,6 @@ import {
   IsBoolean,
   IsEnum,
   IsMongoId,
-  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -30,10 +29,6 @@ export class UpdateWaveDto {
   isNewWave?: boolean;
 
   @IsOptional()
-  @IsMongoId()
-  parentWaveId?: string;
-
-  @IsOptional()
   @IsString()
   causeName?: string;
 
@@ -53,18 +48,6 @@ export class UpdateWaveDto {
   @IsOptional()
   @IsString()
   eventLink?: string;
-
-  @IsOptional()
-  @IsNumber()
-  monetaryValue?: number;
-
-  @IsOptional()
-  @IsString()
-  currency?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  isMonetaryValueVisible?: boolean;
 
   @IsOptional()
   @IsArray()

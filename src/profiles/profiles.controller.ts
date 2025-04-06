@@ -27,7 +27,11 @@ export class ProfileController {
   @Post()
   @UseGuards(JwtAuthGuard)
   create(@Req() req, @Body() createProfileDto: CreateProfileDto) {
-    return this.profileService.create(req.user.id, createProfileDto);
+    return this.profileService.create(
+      req.user.userId,
+      req.user.email,
+      createProfileDto,
+    );
   }
 
   @Get()
@@ -56,7 +60,7 @@ export class ProfileController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   findMyProfile(@Req() req) {
-    return this.profileService.findByUserId(req.user.id);
+    return this.profileService.findByUserId(req.user.userId);
   }
 
   @Get(':id')
@@ -112,5 +116,16 @@ export class ProfileController {
     @Param('charityId', ParseMongoIdPipe) charityId: string,
   ) {
     return this.profileService.removeCharitySupport(id, charityId);
+  }
+
+  @Get('all/charities')
+  @UseGuards(JwtAuthGuard)
+  getAllCharities() {
+    return this.profileService.getAllCharities();
+  }
+
+  @Get('metrics/:userId')
+  getUserMetrics(@Param('userId', ParseMongoIdPipe) userId: string) {
+    return this.profileService.getUserMetrics(userId);
   }
 }

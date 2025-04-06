@@ -47,7 +47,9 @@ export class UsersService {
     }
     return {
       user,
+      profileId: profile ? profile._id : null,
       profileExists: profile ? true : false,
+      profilePicture: profile?.logoImage,
     };
   }
 
@@ -111,5 +113,14 @@ export class UsersService {
         verificationTokenExpires: { $gt: new Date() },
       })
       .exec();
+  }
+
+  async getAllCharities(): Promise<any[]> {
+    const charities = await this.userModel
+      .find({ role: 'charity' })
+      .select('-password')
+      .exec();
+
+    return charities;
   }
 }
