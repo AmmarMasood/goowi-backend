@@ -119,7 +119,6 @@ export class ProfileController {
   }
 
   @Get('all/charities')
-  @UseGuards(JwtAuthGuard)
   getAllCharities() {
     return this.profileService.getAllCharities();
   }

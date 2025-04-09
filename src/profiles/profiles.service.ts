@@ -34,7 +34,7 @@ export class ProfilesService {
     }
 
     // Generate slug from name if not provided
-    const slug = createProfileDto.slug || slugify(email);
+    const slug = slugify(email);
 
     // Check if slug is already taken
     const slugExists = await this.profileModel.findOne({ slug }).exec();
@@ -90,7 +90,10 @@ export class ProfilesService {
    * Get a profile by slug
    */
   async findBySlug(slug: string): Promise<Profile> {
-    const profile = await this.profileModel.findOne({ slug }).exec();
+    const profile = await this.profileModel
+      .findOne({ slug })
+      .populate('userId', '_id email firstName lastName role')
+      .exec();
     if (!profile) {
       throw new NotFoundException(`Profile with slug ${slug} not found`);
     }

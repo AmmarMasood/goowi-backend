@@ -46,6 +46,11 @@ export class WavesController {
     return this.wavesService.findByParticipant(req.user.userId);
   }
 
+  @Get('/participant/part/users/:userId')
+  findByProfileId(@Request() req, @Param('userId') userId: string) {
+    return this.wavesService.findByParticipant(userId);
+  }
+
   @Get('cause/:causeName')
   findByCause(@Param('causeName') causeName: string) {
     return this.wavesService.findByCause(causeName);
